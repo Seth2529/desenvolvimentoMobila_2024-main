@@ -1,0 +1,45 @@
+{
+  "User": [
+    {
+      "id": 1,
+      "username": "h1",
+      "password": "123"
+    },
+    {
+      "id": 2,
+      "username": "h1",
+      "password": "h1"
+    },
+    {
+      "id": 2,
+      "username": "h2",
+      "password": "456"
+    }
+],
+  "Group":[
+    {
+      "id":1,
+      "groupName": "SIF 5 2024",
+      "participantsNumber": "3",
+      "value": "20",
+      "revelation":"10-10-2024",
+      "description": "Apenas alunos do 5º período de sistemas de infromação"
+    },
+    {
+      "id":2,
+      "groupName": "Grupo 2",
+      "participantsNumber": "3",
+      "value": "20",
+      "revelation":"10-10-2024",
+      "description": "Valor R$20"
+    },
+    {
+      "id":3,
+      "groupName": "Grupo 3",
+      "participantsNumber": "3",
+      "value": "20",
+      "revelation":"10-10-2024",
+      "description": "Valor R$20"
+    }
+  ]
+}
