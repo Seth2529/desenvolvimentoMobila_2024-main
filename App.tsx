@@ -3,11 +3,15 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import theme from './src/styles/theme';
 import StackComponent from './src/routes/stack';
+import { AuthProvider } from './src/provider/AuthProvider';
 
 export default function App() {
 
   return (
-   <StackComponent />
+    <AuthProvider>
+      <StackComponent />
+    </AuthProvider>
+
   );
 }
 

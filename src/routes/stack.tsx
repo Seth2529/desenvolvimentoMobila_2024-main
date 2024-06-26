@@ -37,7 +37,7 @@ export default function StackComponent(){
         <GestureHandlerRootView>
         <NavigationContainer>
             <Stack.Navigator>
-                <Stack.Screen  name="Splash" component={Splash} options={{gestureEnabled:false ,headerShown: false }}  />
+                {/* <Stack.Screen  name="Splash" component={Splash} options={{gestureEnabled:false ,headerShown: false }}  /> */}
                 <Stack.Screen  name="Login" component={Login} options={{headerShown: false }}  />
                 <Stack.Screen  name="Register" component={Register}   options={{headerShown: false }}   />
                 <Stack.Screen  name="ForgotPassword" component={ForgotPassword} options={{headerShown: false }} />
