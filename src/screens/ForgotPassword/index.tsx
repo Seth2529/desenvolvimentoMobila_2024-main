@@ -12,6 +12,10 @@ const ForgotPassword = () => {
       navigation.navigate('Login');
 
     };
+    
+    const handleBack = () => {
+      navigation.goBack();
+    }
   
     return (
       <View style={styles.container}>
@@ -24,6 +28,9 @@ const ForgotPassword = () => {
         />
          <TouchableOpacity onPress={handleLogin} style={styles.button} activeOpacity={0.1}>
         <Text style={styles.buttonText}>Enviar e-mail</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleBack} style={styles.button} activeOpacity={0.1}>
+        <Text style={styles.buttonText}>Voltar</Text>
       </TouchableOpacity>
       </View>
     );

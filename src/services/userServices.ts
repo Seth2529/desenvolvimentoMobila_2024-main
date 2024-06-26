@@ -1,81 +1,107 @@
 import axios, { AxiosResponse } from 'axios';
-import { Group, User } from '../types/types';
+import { NewUser, User } from '../types/types';
 
-const BASE_URL = 'http://192.168.0.101:3000';
+const BASE_URL = 'http://192.168.0.101:5092';
 
 class UserService {
+  async addUser(user: User): Promise<boolean> {
+    try {
+      const formData = new FormData();
+      formData.append('Username', user.username);
+      formData.append('Email', user.email);
+      formData.append('Password', user.password);
 
-    constructor() {
-        // Se necessário, adicione inicializações aqui
+      console.log('Carregando imagem:', user.photo);
+      
+      const response = await fetch(user.photo);
+      const blob = await response.blob();
+      formData.append('Photo', blob, 'profile.jpg');
+
+      console.log('Enviando dados para o servidor...');
+      
+      const result = await axios.post(`${BASE_URL}/User/AddUser`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Resposta do servidor:', result.status);
+
+      return result.status === 200;
+    } catch (error) {
+      console.error('Erro ao enviar foto:', error);
+      return false;
     }
-
-    async addUser(user: User): Promise<boolean> {
-        try {
-            const formData = new FormData();
-            formData.append('username', user.username);
-            formData.append('password', user.password);
-
-            const responsePhoto = await fetch(user.photo);
-            const blob = await responsePhoto.blob();
-            formData.append('photo', blob, 'photo.png');
-
-            const uploadResponse = await axios.post(`${BASE_URL}/users/addUser`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-
-            return uploadResponse.status === 201;
-
-        } catch (error) {
-            console.error('Erro ao adicionar usuário:', error);
-            return false; // Retorna false em caso de erro
-        }
-    }
-
-    async validateUser(username: string, password: string): Promise<number> {
-      try {
-          const response: AxiosResponse<User[]> = await axios.get(`${BASE_URL}/User?username=${username}&password=${password}`);
-          if (response.data.length === 0) {
-            return -1;
-          }
-          
-          return response.data.at(0)?.id as number; 
-      } catch (error) {
-        console.error('Erro ao validar usuário:', error);
-        return -1; // Retorna false em caso de erro
-      }
-    }
-
-    async getUserbyId(userId: number): Promise<User> {
-        try {
-            const response: AxiosResponse<User> = await axios.get(`${BASE_URL}/User?id=${userId}`);
-            return response.data;
-        } catch (error) {
-            console.error('Erro ao buscar usuário pelo ID:', error);
-            return { id: 0, username: '', password: '', photo: '' };
-        }
-    }
-
-    async getAllUsers(): Promise<User[] | null> {
-        try {
-            const response: AxiosResponse<User[]> = await axios.get(`${BASE_URL}/User`);
-            return response.data;
-        } catch (error) {
-            console.error('Erro ao buscar todos os usuários:', error);
-            return null;
-        }
-    }
+  }
   
-  async getAllGroups(): Promise<Group[] | null> {
-        try {
-            const response: AxiosResponse<Group[]> = await axios.get(`${BASE_URL}/Group`);
-            return response.data;
-        } catch (error) {
-            console.error('Erro ao buscar todos os grupos:', error);
-            return null;
-        }
+  async testConnection(): Promise<boolean> {
+    try {
+      console.log('Testing connection to the server...');
+      const response = await axios.get(`${BASE_URL}/User/TestDbConnection`);
+      return response.status === 200;
+    } catch (error) {
+      console.error('Error testing connection:', error);
+      return false;
     }
+  }
+  
+  async validateUser(email: string, password: string): Promise<number> {
+    try {
+      const formData = new FormData();
+      formData.append('Email', email);
+      formData.append('Password', password);
+  
+      const response: AxiosResponse<{ success: boolean; message: string }> = await axios.post(`${BASE_URL}/Auth/Authenticate`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      if (response.data.success) {
+        const userResponse: AxiosResponse<User> = await axios.get(`${BASE_URL}/Auth/GetUserByEmail?email=${email}`);
+        return userResponse.data.userId;
+      } else {
+        return -1;
+      }
+    } catch (error) {
+      console.error('Erro ao validar usuário:', error);
+      return -1;
+    }
+  }
+  async forgotPassword(email: string): Promise<void> {
+    try {
+      await axios.post(`${BASE_URL}/ForgotPassword`, { Email: email });
+    } catch (error) {
+      console.error('Erro ao solicitar redefinição de senha:', error);
+    }
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    try {
+      await axios.post(`${BASE_URL}/ResetPassword`, { Token: token, NewPassword: newPassword });
+    } catch (error) {
+      console.error('Erro ao redefinir senha:', error);
+    }
+  }
+
+  async getUserById(userId: number): Promise<User> {
+    try {
+      const response: AxiosResponse<User> = await axios.get(`${BASE_URL}/User/GetUserById?userid=${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar usuário pelo ID:', error);
+      throw error;
+    }
+  }
+  async getAllUsers(): Promise<User[] | null> {
+    try {
+      const response: AxiosResponse<User[]> = await axios.get(`${BASE_URL}/GetAllUsers`);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar todos os usuários:', error);
+      return null;
+    }
+  }
 }
 
 export default UserService;

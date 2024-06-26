@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Button, Image, View, TouchableOpacity, Text, TextInput, StyleSheet } from 'react-native';
+import { Alert, Image, View, TouchableOpacity, Text, TextInput, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { StackTypes } from '../../routes/stack';
 import { User } from '../../types/types';
@@ -13,15 +13,12 @@ const Register = () => {
   const [Senha, setSenha] = useState<string>('');
 
   const pickFoto = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result);
 
     if (!result.canceled) {
       setFoto(result.assets[0].uri);
@@ -37,31 +34,47 @@ const Register = () => {
   const userService = new UserService();
 
   const handleRegister = async () => {
-    try{
-      const usuario: User ={
-        id: 3,
+    try {
+      const usuario: Omit<User, 'userId'> = {
         username: Nome,
         password: Senha,
+        email: Email,
         photo: Foto
       };
 
-      const userAdded = await userService.addUser(usuario);
-      if(userAdded){
-        console.log('Usuário adicionado com sucesso!');
-      }else{
-        console.log('Erro ao adicionar usuário');
+      console.log('Dados do usuário:', usuario);
+
+      const userAdded = await userService.addUser(usuario as User);
+      console.log('Resposta ao adicionar usuário:', userAdded);
+      if (userAdded) {
+        Alert.alert('Sucesso', 'Usuário adicionado com sucesso!');
+      } else {
+        Alert.alert('Erro', 'Erro ao adicionar usuário');
       }
-    } catch(error){
-        console.error('Error uploading image:', error);
+    } catch (error) {
+      Alert.alert('Erro', `Erro ao adicionar usuário: ${error}`);
+    }
+  };
+
+  const testConnection = async () => {
+    try {
+      const response = await userService.testConnection();
+      if (response) {
+        Alert.alert('Sucesso', 'Conexão com a API realizada com sucesso.');
+      } else {
+        Alert.alert('Erro', 'Falha ao conectar com a API.');
       }
+    } catch (error) {
+      Alert.alert('Erro', `Erro ao testar conexão: ${error}`);
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Registre-se!</Text>
-        <TouchableOpacity onPress={pickFoto}>
-          <Text style={styles.TextImage}>Escolha uma imagem da galeria</Text>
-        </TouchableOpacity>
+      <TouchableOpacity onPress={pickFoto}>
+        <Text style={styles.TextImage}>Escolha uma imagem da galeria</Text>
+      </TouchableOpacity>
       {Foto && <Image source={{ uri: Foto }} style={{ width: 200, height: 200 }} />}
       <TextInput
         style={styles.input}
@@ -83,6 +96,9 @@ const Register = () => {
       />
       <TouchableOpacity onPress={handleRegister} style={styles.button} activeOpacity={0.1}>
         <Text style={styles.buttonText}>Cadastrar</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={testConnection} style={styles.button} activeOpacity={0.1}>
+        <Text style={styles.buttonText}>Testar Conexão</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={handleBack} style={styles.button} activeOpacity={0.1}>
         <Text style={styles.buttonText}>Voltar</Text>
@@ -113,14 +129,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#fff',
   },
-  TextImage:{
-    color: '#816c04', 
-    margin:10
+  TextImage: {
+    color: '#816c04',
+    margin: 10,
   },
   button: {
     width: '50%',
     height: 40,
-    margin:5,
+    margin: 5,
     borderRadius: 8,
     backgroundColor: '#816c04',
     justifyContent: 'center',
