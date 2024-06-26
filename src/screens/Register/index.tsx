@@ -56,19 +56,6 @@ const Register = () => {
     }
   };
 
-  const testConnection = async () => {
-    try {
-      const response = await userService.testConnection();
-      if (response) {
-        Alert.alert('Sucesso', 'Conexão com a API realizada com sucesso.');
-      } else {
-        Alert.alert('Erro', 'Falha ao conectar com a API.');
-      }
-    } catch (error) {
-      Alert.alert('Erro', `Erro ao testar conexão: ${error}`);
-    }
-  };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Registre-se!</Text>
@@ -96,9 +83,6 @@ const Register = () => {
       />
       <TouchableOpacity onPress={handleRegister} style={styles.button} activeOpacity={0.1}>
         <Text style={styles.buttonText}>Cadastrar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={testConnection} style={styles.button} activeOpacity={0.1}>
-        <Text style={styles.buttonText}>Testar Conexão</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={handleBack} style={styles.button} activeOpacity={0.1}>
         <Text style={styles.buttonText}>Voltar</Text>

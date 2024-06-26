@@ -33,17 +33,7 @@ class UserService {
       return false;
     }
   }
-  
-  async testConnection(): Promise<boolean> {
-    try {
-      console.log('Testing connection to the server...');
-      const response = await axios.get(`${BASE_URL}/User/TestDbConnection`);
-      return response.status === 200;
-    } catch (error) {
-      console.error('Error testing connection:', error);
-      return false;
-    }
-  }
+
   
   async validateUser(email: string, password: string): Promise<number> {
     try {
