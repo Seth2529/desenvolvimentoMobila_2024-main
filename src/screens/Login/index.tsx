@@ -5,6 +5,7 @@ import PassWordInput from '../../components/Password';
 import CustomButton from '../../components/CustomButton';
 import { Text, TextInput, View, StyleSheet, TouchableOpacity, BackHandler } from 'react-native';
 import { StackTypes } from '../../routes/stack';
+import { useAuth } from '../../provider/AuthProvider'; // Importação do hook de autenticação
 
 const Login = () => {
     const [login, setLogin] = useState<string>('');
@@ -13,6 +14,7 @@ const Login = () => {
     const [passwordError, setPasswordError] = useState(false);
     const userService = new UserService();
     const navigation = useNavigation<StackTypes>();
+    const { setUser } = useAuth(); // Utilizando o contexto de autenticação
 
     useEffect(() => {
         BackHandler.addEventListener('hardwareBackPress', () => true);
@@ -25,10 +27,11 @@ const Login = () => {
         if (login && password) {
             const userId = await userService.validateUser(login, password);
             if (userId !== -1) {
-                alert('Usuário autenticado com sucesso');
+                const user = await userService.getUserById(userId);
+                setUser(user); 
                 setLogin('');
                 setPassword('');
-                navigation.navigate('Home', { userId: userId });
+                navigation.navigate('Home');
             } else {
                 alert('Usuário e/ou senha inválidos');
             }

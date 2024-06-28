@@ -1,11 +1,3 @@
-export interface NewUser {
-  username: string;
-  password: string;
-  email:string;
-  photo: string;
-};
-
-
 export interface User {
     userId: number;
     username: string;
@@ -15,10 +7,22 @@ export interface User {
   };
 
 export interface Group {
-    id: number;
+    groupID: number;
     groupName: string;
-    participantsNumber: number;
+    participantCount?: string;
     value: number;
-    revelation: string;
+    dateDiscover: string;
     description: string;
+    photo: string;
+  };
+  export interface Invite {
+    inviteId: number;
+    email: string;
+    status: string;
+    invitationDate: string;
+    responseDate: string;
+    groupId: number;
+    userID: number;
+    group: Group | null; 
+    user: User | null;
   };

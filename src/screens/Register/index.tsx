@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Alert, Image, View, TouchableOpacity, Text, TextInput, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { StackTypes } from '../../routes/stack';
-import { User } from '../../types/types';
 import UserService from '../../services/userServices';
+import PassWordInput from '../../components/Password';
 
 const Register = () => {
   const [Foto, setFoto] = useState<string>('');
@@ -35,24 +35,35 @@ const Register = () => {
 
   const handleRegister = async () => {
     try {
-      const usuario: Omit<User, 'userId'> = {
-        username: Nome,
-        password: Senha,
-        email: Email,
-        photo: Foto
-      };
+      const formData = new FormData();
 
-      console.log('Dados do usuário:', usuario);
+      if (Foto) {
+        const photoUriParts = Foto.split('.');
+        const fileType = photoUriParts[photoUriParts.length - 1];
+        const fileName = Foto.split('/').pop();
 
-      const userAdded = await userService.addUser(usuario as User);
-      console.log('Resposta ao adicionar usuário:', userAdded);
-      if (userAdded) {
-        Alert.alert('Sucesso', 'Usuário adicionado com sucesso!');
+        formData.append('Photo', {
+          uri: Foto,
+          name: fileName,
+          type: `image/${fileType}`,
+        } as any);
+      }
+
+      formData.append('Username', Nome);
+      formData.append('Email', Email);
+      formData.append('Password', Senha);
+
+      const response = await userService.addUser(formData);
+
+      if (response.status === 200) {
+        Alert.alert('Sucesso', 'Usuário cadastrado com sucesso!');
+        navigation.navigate('Login'); // ou a rota que você desejar
       } else {
-        Alert.alert('Erro', 'Erro ao adicionar usuário');
+        Alert.alert('Erro', 'Falha ao cadastrar usuário.');
       }
     } catch (error) {
-      Alert.alert('Erro', `Erro ao adicionar usuário: ${error}`);
+      console.error('Erro ao cadastrar usuário:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao cadastrar o usuário.');
     }
   };
 
@@ -75,11 +86,10 @@ const Register = () => {
         onChangeText={setEmail}
         value={Email}
       />
-      <TextInput
-        style={styles.input}
+      <PassWordInput
         placeholder="Digite sua senha"
-        secureTextEntry={true}
         onChangeText={setSenha}
+        value={Senha}
       />
       <TouchableOpacity onPress={handleRegister} style={styles.button} activeOpacity={0.1}>
         <Text style={styles.buttonText}>Cadastrar</Text>

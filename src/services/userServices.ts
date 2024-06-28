@@ -1,40 +1,23 @@
 import axios, { AxiosResponse } from 'axios';
-import { NewUser, User } from '../types/types';
+import { User } from '../types/types';
 
 const BASE_URL = 'http://192.168.0.101:5092';
 
 class UserService {
-  async addUser(user: User): Promise<boolean> {
+  async addUser(formData: FormData) {
     try {
-      const formData = new FormData();
-      formData.append('Username', user.username);
-      formData.append('Email', user.email);
-      formData.append('Password', user.password);
-
-      console.log('Carregando imagem:', user.photo);
-      
-      const response = await fetch(user.photo);
-      const blob = await response.blob();
-      formData.append('Photo', blob, 'profile.jpg');
-
-      console.log('Enviando dados para o servidor...');
-      
-      const result = await axios.post(`${BASE_URL}/User/AddUser`, formData, {
+      const response = await axios.post(`${BASE_URL}/User/AddUser`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-
-      console.log('Resposta do servidor:', result.status);
-
-      return result.status === 200;
+      return response;
     } catch (error) {
-      console.error('Erro ao enviar foto:', error);
-      return false;
+      console.error('Erro ao cadastrar usuário:', error);
+      throw error;
     }
   }
 
-  
   async validateUser(email: string, password: string): Promise<number> {
     try {
       const formData = new FormData();
@@ -58,22 +41,46 @@ class UserService {
       return -1;
     }
   }
-  async forgotPassword(email: string): Promise<void> {
+  async forgotPassword(email: string): Promise<boolean> {
     try {
-      await axios.post(`${BASE_URL}/ForgotPassword`, { Email: email });
+      const formData = new FormData();
+      formData.append('Email', email);
+      const response = await axios.post(`${BASE_URL}/Auth/ForgotPassword`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.status === 200;
     } catch (error) {
       console.error('Erro ao solicitar redefinição de senha:', error);
+      return false;
     }
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<void> {
+  async resetPassword(email: string, token: string, newPassword: string): Promise<void> {
     try {
-      await axios.post(`${BASE_URL}/ResetPassword`, { Token: token, NewPassword: newPassword });
+      const formData = new FormData();
+      formData.append('Email', email);
+      formData.append('Token', token);
+      formData.append('NewPassword', newPassword);
+  
+      const response = await axios.post(`${BASE_URL}/Auth/ResetPassword`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
     } catch (error) {
-      console.error('Erro ao redefinir senha:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          console.error('Erro ao redefinir senha:', error.response.data);
+        } else {
+          console.error('Erro ao redefinir senha:', error.message);
+        }
+      } else {
+        console.error('Erro desconhecido ao redefinir senha:', (error as Error).message);
+      }
     }
   }
-
   async getUserById(userId: number): Promise<User> {
     try {
       const response: AxiosResponse<User> = await axios.get(`${BASE_URL}/User/GetUserById?userid=${userId}`);
